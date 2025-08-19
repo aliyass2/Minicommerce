@@ -15,6 +15,14 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\Category\Dtos\" />
+    <Folder Include="Features\Category\Queries\" />
+    <Folder Include="Features\Category\Validators\" />
+    <Folder Include="Features\CheckOut\Queries\" />
+    <Folder Include="Features\Order\Queries\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
