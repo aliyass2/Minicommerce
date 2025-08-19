@@ -1,4 +1,6 @@
 using MediatR;
+using Minicommerce.Application.Catalog.Products.Models;
+using Minicommerce.Application.Common.Models;
 
 namespace Minicommerce.Application.Catalog.Products.Add;
 
@@ -9,4 +11,4 @@ public sealed record AddProductCommand(
     string Currency,
     int StockQuantity,
     Guid CategoryId
-) : IRequest<Minicommerce.Application.Catalog.Products.Models.ProductDto>;
+) : IRequest<Result<ProductDto>>;

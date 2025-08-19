@@ -41,7 +41,48 @@ public class Product : AggregateRoot
         Price = newPrice;
         AddDomainEvent(new ProductPriceUpdatedEvent(Id, newPrice.Amount));
     }
+public void UpdateName(string name)
+{
+    if (string.IsNullOrWhiteSpace(name))
+        throw new CatalogException("Product name cannot be empty.");
+    
+    Name = name.Trim();
+    AddDomainEvent(new ProductUpdatedEvent(Id, "Name", Name));
+}
 
+public void UpdateDescription(string description)
+{
+    Description = description?.Trim() ?? string.Empty;
+    AddDomainEvent(new ProductUpdatedEvent(Id, "Description", Description));
+}
+
+public void UpdateStockQuantity(int stockQuantity)
+{
+    if (stockQuantity < 0)
+        throw new CatalogException("Stock quantity cannot be negative.");
+    
+    var previousStock = StockQuantity;
+    StockQuantity = stockQuantity;
+    
+    if (stockQuantity > previousStock)
+    {
+        AddDomainEvent(new ProductStockIncreasedEvent(Id, stockQuantity - previousStock));
+    }
+    else if (stockQuantity < previousStock)
+    {
+        AddDomainEvent(new ProductStockDecreasedEvent(Id, previousStock - stockQuantity));
+    }
+}
+
+public void UpdateCategory(Category category)
+{
+    if (category is null)
+        throw new CatalogException("Category is required.");
+    
+    Category = category;
+    CategoryId = category.Id;
+    AddDomainEvent(new ProductUpdatedEvent(Id, "Category", category.Name));
+}
     public void DecreaseStock(int quantity)
     {
         if (quantity <= 0) throw new CatalogException("Quantity must be positive.");

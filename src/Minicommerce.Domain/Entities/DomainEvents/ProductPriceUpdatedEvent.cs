@@ -13,7 +13,19 @@ public class ProductPriceUpdatedEvent : DomainEvent
         NewPrice = newPrice;
     }
 }
+    public class ProductUpdatedEvent : DomainEvent
+    {
+        public Guid ProductId { get; }
+        public string PropertyName { get; }
+        public object NewValue { get; }
 
+        public ProductUpdatedEvent(Guid productId, string propertyName, object newValue)
+        {
+            ProductId = productId;
+            PropertyName = propertyName;
+            NewValue = newValue;
+        }
+    }
 public class ProductStockDecreasedEvent : DomainEvent
 {
     public Guid ProductId { get; }
