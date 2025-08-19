@@ -15,7 +15,6 @@ public class AuthorizationBehavior<TRequest, TResponse>
     private static readonly HashSet<string> AnonymousCommands = new()
     {
         "LoginCommand",
-        "GetFarmersQuery", // If you add registration later
         "ForgotPasswordCommand", // If you add password reset
         "ResetPasswordCommand"
     };

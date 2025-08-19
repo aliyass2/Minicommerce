@@ -40,7 +40,6 @@ public static class DependencyInjection
         // Register Unit of Work
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<ITokenService, TokenService>();
-            // services.AddScoped<ICertificateGeneratorService, CertificateGeneratorService>();
 
 
         // Identity
@@ -77,9 +76,6 @@ services.AddIdentityCore<ApplicationUser>(options =>
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
-        // services.AddScoped<IInspectionTaskRepository, InspectionTaskRepository>();
-        // services.AddScoped<ICertificateRepository, CertificateRepository>();
-        // services.AddScoped<IFarmerRepository, FarmerRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         // Infrastructure Services
