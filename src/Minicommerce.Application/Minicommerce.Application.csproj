@@ -17,8 +17,6 @@
 
   <ItemGroup>
     <Folder Include="Features\Auth\Queries\" />
-    <Folder Include="Features\Category\Dtos\" />
-    <Folder Include="Features\Category\Queries\" />
     <Folder Include="Features\Category\Validators\" />
     <Folder Include="Features\CheckOut\Queries\" />
     <Folder Include="Features\Order\Queries\" />

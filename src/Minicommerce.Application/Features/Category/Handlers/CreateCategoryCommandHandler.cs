@@ -1,25 +1,52 @@
+using AutoMapper;
 using MediatR;
 using Minicommerce.Application.Catalog.Categories.Create;
+using Minicommerce.Application.Common.Models;
+using Minicommerce.Application.Features.Category.Dtos;
 using Minicommerce.Domain.Catalog;
 using Minicommerce.Domain.Repositories;
 
-public sealed class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, Guid>
+public sealed class AddCategoryCommandHandler
+    : IRequestHandler<AddCategoryCommand, Result<CategoryDto>>
 {
     private readonly IUnitOfWork _uow;
-    public CreateCategoryCommandHandler(IUnitOfWork uow) => _uow = uow;
+    private readonly IMapper _mapper;
 
-    public async Task<Guid> Handle(CreateCategoryCommand request, CancellationToken ct)
+    public AddCategoryCommandHandler(IUnitOfWork uow, IMapper mapper)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-            throw new CatalogException("Category name is required.");
+        _uow = uow;
+        _mapper = mapper;
+    }
 
-        var repo = _uow.Repository<Category>();
-        var exists = await repo.AnyAsync(c => c.Name == request.Name, ct);
-        if (exists) throw new CatalogException("Category already exists.");
+    public async Task<Result<CategoryDto>> Handle(AddCategoryCommand request, CancellationToken ct)
+    {
+        try
+        {
+            // 1) Validate input
+            var name = request.Name?.Trim();
+            if (string.IsNullOrWhiteSpace(name))
+                return Result<CategoryDto>.Failure("Category name is required.");
 
-        var category = new Category(request.Name);
-        await repo.AddAsync(category, ct);
-        await _uow.SaveChangesAsync(ct);
-        return category.Id;
+            // 2) Uniqueness
+            var repo = _uow.Repository<Category>();
+            var exists = await repo.AnyAsync(c => c.Name == name, ct);
+            if (exists)
+                return Result<CategoryDto>.Failure("Category already exists.");
+
+            // 3) Create aggregate
+            var category = new Category(name);
+
+            // 4) Persist
+            await repo.AddAsync(category, ct);
+            await _uow.SaveChangesAsync(ct);
+
+            // 5) Map to DTO
+            var dto = _mapper.Map<CategoryDto>(category);
+            return Result<CategoryDto>.Success(dto);
+        }
+        catch (Exception ex)
+        {
+            return Result<CategoryDto>.Failure($"An error occurred while creating the category: {ex.Message}");
+        }
     }
 }

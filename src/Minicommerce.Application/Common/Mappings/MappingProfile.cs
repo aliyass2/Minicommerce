@@ -3,6 +3,7 @@ using AutoMapper;
 using Minicommerce.Application.Catalog.Products.Models;
 using Minicommerce.Application.Checkout.Dtos;
 using Minicommerce.Application.Features.Cart.Dtos;
+using Minicommerce.Application.Features.Category.Dtos;
 using Minicommerce.Application.Features.CheckOut.Dtos;
 using Minicommerce.Application.Features.Users.Dtos;
 using Minicommerce.Application.Orders.Dtos;
@@ -33,6 +34,8 @@ public class MappingProfile : Profile
             .ForMember(d => d.Currency, cfg => cfg.MapFrom(s => s.Price.Currency))
             .ForMember(d => d.CategoryName, cfg => cfg.MapFrom(s => s.Category.Name));
 
+        //Category Mapping
+        CreateMap<Category, CategoryDto>();
 
         //Cart Mapping
         CreateMap<CartItem, CartItemDto>();

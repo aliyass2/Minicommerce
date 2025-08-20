@@ -127,15 +127,20 @@ public class DatabaseInitializer
             var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
-            // Seed roles first
+            // Seed roles
             var roleSeeder = new RoleSeeder(roleManager);
             await roleSeeder.SeedRolesAsync();
             _logger.LogInformation("Roles seeded successfully");
 
-            // Then seed users
+            // Seed users
             var userSeeder = new UserSeeder(userManager, roleManager, loggerFactory.CreateLogger<UserSeeder>());
             await userSeeder.SeedUsersAsync();
             _logger.LogInformation("Users seeded successfully");
+
+            // Seed catalog (categories + products)
+            var catalogSeeder = services.GetRequiredService<CatalogSeeder>();
+            await catalogSeeder.SeedAsync();
+            _logger.LogInformation("Catalog seeded successfully");
         }
         catch (Exception ex)
         {
@@ -143,4 +148,5 @@ public class DatabaseInitializer
             throw;
         }
     }
+
 }

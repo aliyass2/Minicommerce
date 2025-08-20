@@ -15,4 +15,11 @@ public class Category : BaseEntity
 
         Name = name;
     }
+    public void UpdateName(string name)
+    {
+    if (string.IsNullOrWhiteSpace(name))
+        throw new CatalogException("Category name cannot be empty.");
+
+    Name = name.Trim();
+    }
 }

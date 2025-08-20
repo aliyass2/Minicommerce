@@ -103,6 +103,8 @@ builder.Services.AddApplicationServices();
 builder.Services.AddScoped<RoleSeeder>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DatabaseInitializer>();
+builder.Services.AddScoped<CatalogSeeder>();   // ← add this
+
 
 builder.Services.AddCors(options =>
 {

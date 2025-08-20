@@ -89,9 +89,7 @@ public class ProductController : ControllerBase
 
         return Ok(result.Data);
     }
-        /// <summary>
-    /// Delete Product 
-    /// </summary>
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteProduct(Guid id)
     {

@@ -39,7 +39,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>, IApplica
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        //For Seeding Purposes
+            builder.Entity<Product>(b =>
+            {
+                b.OwnsOne(p => p.Price, owned =>
+                {
+                    owned.Property(m => m.Amount)
+                        .HasColumnType("decimal(18,2)")
+                        .IsRequired();
 
+                    owned.Property(m => m.Currency)
+                        .HasMaxLength(3)
+                        .HasColumnName("PriceCurrency")
+                        .IsRequired();
+                });
+            });
         builder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
 
         // Identity tables
