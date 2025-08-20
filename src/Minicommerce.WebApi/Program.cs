@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Minicommerce.Application;
 using Minicommerce.Infrastructure;
 using Minicommerce.Infrastructure.Data;
@@ -14,8 +15,36 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddControllers();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Minicommerce API", Version = "v1" });
+
+    // JWT bearer scheme for the Authorize button
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste your token here (without 'Bearer ' prefix)"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});builder.Services.AddControllers();
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -73,6 +102,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddApplicationServices();
 builder.Services.AddScoped<RoleSeeder>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<DatabaseInitializer>();
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -121,13 +152,38 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.EnablePersistAuthorization(); // keeps token across page reloads
+    });
 }
+
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
+// ⬇️ Apply migrations & seed (runs at app startup)
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     var logger = services.GetRequiredService<ILogger<Program>>();
+
+//     try
+//     {
+//         var db = services.GetRequiredService<ApplicationDbContext>();
+//         await db.Database.MigrateAsync(); // applies any pending migrations
+
+//         var initializer = services.GetRequiredService<DatabaseInitializer>();
+//         await initializer.InitializeAsync(); // seeds roles + users
+//         logger.LogInformation("✅ Database migrated and seeded successfully.");
+//     }
+//     catch (Exception ex)
+//     {
+//         logger.LogError(ex, "❌ Error during database migration/seeding.");
+//         throw; // fail fast if seeding/migration is critical
+//     }
+// }
 
 
 app.Run();

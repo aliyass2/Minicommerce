@@ -1,43 +1,43 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
-namespace Minicommerce.Infrastructure.Data.Seed;
-
-// Constants for role names
-public static class Roles
+namespace Minicommerce.Infrastructure.Data.Seed
 {
-    public const string Admin = "Admin";
-    public const string GeneralManager = "GeneralManager";
-    public const string DataEntry = "DataEntry";
-
-}
-
-// Role seeder service
-public class RoleSeeder
-{
-    private readonly RoleManager<IdentityRole> _roleManager;
-
-    public RoleSeeder(RoleManager<IdentityRole> roleManager)
+    // Constants for role names
+    public static class Roles
     {
-        _roleManager = roleManager;
+        public const string Admin = "Admin";
+        public const string GeneralManager = "GeneralManager";
+        public const string DataEntry = "DataEntry";
+        public const string Customer = "Customer";
     }
 
-    public async Task SeedRolesAsync()
+    // Role seeder service
+    public class RoleSeeder
     {
-        var roles = new[]
-        {
-            Roles.Admin,
-            Roles.GeneralManager,
-            Roles.DataEntry
-        };
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        foreach (var roleName in roles)
+        public RoleSeeder(RoleManager<IdentityRole> roleManager)
         {
-            if (!await _roleManager.RoleExistsAsync(roleName))
+            _roleManager = roleManager;
+        }
+
+        public async Task SeedRolesAsync()
+        {
+            var roles = new[]
             {
-                var role = new IdentityRole(roleName);
-                await _roleManager.CreateAsync(role);
+                Roles.Admin,
+                Roles.GeneralManager,
+                Roles.DataEntry,
+                Roles.Customer
+            };
+
+            foreach (var roleName in roles)
+            {
+                if (!await _roleManager.RoleExistsAsync(roleName))
+                {
+                    var role = new IdentityRole(roleName);
+                    await _roleManager.CreateAsync(role);
+                }
             }
         }
     }

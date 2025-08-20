@@ -25,75 +25,80 @@ public class UserSeeder
     {
         const string defaultPassword = "Admin@123";
 
+        // Ensure roles exist (defensive; RoleSeeder should have done this already)
+        foreach (var role in new[] { Roles.Admin, Roles.GeneralManager, Roles.DataEntry, Roles.Customer })
+        {
+            if (!await _roleManager.RoleExistsAsync(role))
+                await _roleManager.CreateAsync(new IdentityRole(role));
+        }
+
         var seedUsers = new[]
         {
-            new
-            {
-                UserName = "admin",
-                FullName = "System Administrator",
-                GovernmentId = "ADM001",
-                Position = "System Administrator",
-                Role = Roles.Admin
-            },
-            new
-            {
-                UserName = "general.manager",
-                FullName = "Ahmed Al-Rashid",
-                GovernmentId = "GM001",
-                Position = "General Manager",
-                Role = Roles.GeneralManager
-            },
+            new { UserName = "admin",            FullName = "System Administrator",Position = "System Administrator", Role = Roles.Admin },
+            new { UserName = "admin2",           FullName = "Backup Administrator",Position = "System Administrator", Role = Roles.Admin },
+
+            new { UserName = "general.manager",  FullName = "Ahmed Al-Rashid", Position = "General Manager",      Role = Roles.GeneralManager },
+            new { UserName = "general.manager2", FullName = "Sara Al-Hakim",   Position = "General Manager",      Role = Roles.GeneralManager },
+
+            new { UserName = "data.entry",       FullName = "Ali Kareem",  Position = "Data Entry",           Role = Roles.DataEntry },
+            new { UserName = "data.entry2",      FullName = "Fatima Noor",  Position = "Data Entry",           Role = Roles.DataEntry },
+
+            new { UserName = "customer",         FullName = "Omar Hasan", Position = "Customer",             Role = Roles.Customer },
+            new { UserName = "customer2",        FullName = "Lina Jawad", Position = "Customer",             Role = Roles.Customer },
         };
 
-        foreach (var seedUser in seedUsers)
+        foreach (var su in seedUsers)
         {
             try
             {
-                // Check if user already exists
-                var existingUser = await _userManager.FindByNameAsync(seedUser.UserName);
-                if (existingUser != null)
+                // Skip if exists
+                var existing = await _userManager.FindByNameAsync(su.UserName);
+                if (existing != null)
                 {
-                    _logger.LogInformation("User {UserName} already exists, skipping", seedUser.UserName);
+                    _logger.LogInformation("User {UserName} already exists, skipping", su.UserName);
+                    // Ensure role assignment (in case role was added later)
+                    if (!await _userManager.IsInRoleAsync(existing, su.Role))
+                    {
+                        var roleFix = await _userManager.AddToRoleAsync(existing, su.Role);
+                        if (!roleFix.Succeeded)
+                            _logger.LogError("Failed to ensure role {Role} for existing user {UserName}: {Errors}",
+                                su.Role, su.UserName, string.Join(", ", roleFix.Errors.Select(e => e.Description)));
+                    }
                     continue;
                 }
 
                 // Create new user
                 var user = new ApplicationUser
                 {
-                    UserName = seedUser.UserName,
-                    FullName = seedUser.FullName,
-                    Position = seedUser.Position,
+                    UserName = su.UserName,
+                    FullName = su.FullName,
+                    Position = su.Position,
                     IsActive = true,
                     CreatedAt = DateTime.UtcNow
                 };
 
-                // Create user with password
                 var createResult = await _userManager.CreateAsync(user, defaultPassword);
                 if (!createResult.Succeeded)
                 {
                     _logger.LogError("Failed to create user {UserName}: {Errors}",
-                        seedUser.UserName,
-                        string.Join(", ", createResult.Errors.Select(e => e.Description)));
+                        su.UserName, string.Join(", ", createResult.Errors.Select(e => e.Description)));
                     continue;
                 }
 
-                // Assign role to user
-                var roleResult = await _userManager.AddToRoleAsync(user, seedUser.Role);
+                var roleResult = await _userManager.AddToRoleAsync(user, su.Role);
                 if (!roleResult.Succeeded)
                 {
                     _logger.LogError("Failed to assign role {Role} to user {UserName}: {Errors}",
-                        seedUser.Role,
-                        seedUser.UserName,
-                        string.Join(", ", roleResult.Errors.Select(e => e.Description)));
+                        su.Role, su.UserName, string.Join(", ", roleResult.Errors.Select(e => e.Description)));
                     continue;
                 }
 
-                _logger.LogInformation("Successfully created user {UserName} ({FullName}) with role {Role}",
-                    seedUser.UserName, seedUser.FullName, seedUser.Role);
+                _logger.LogInformation("Created user {UserName} ({FullName}) with role {Role}",
+                    su.UserName, su.FullName, su.Role);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error creating user {UserName}", seedUser.UserName);
+                _logger.LogError(ex, "Error creating user {UserName}", su.UserName);
             }
         }
     }
