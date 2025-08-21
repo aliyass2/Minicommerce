@@ -166,26 +166,26 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
 // ⬇️ Apply migrations & seed (runs at app startup)
-// using (var scope = app.Services.CreateScope())
-// {
-//     var services = scope.ServiceProvider;
-//     var logger = services.GetRequiredService<ILogger<Program>>();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
 
-//     try
-//     {
-//         var db = services.GetRequiredService<ApplicationDbContext>();
-//         await db.Database.MigrateAsync(); // applies any pending migrations
+    try
+    {
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        await db.Database.MigrateAsync(); // applies any pending migrations
 
-//         var initializer = services.GetRequiredService<DatabaseInitializer>();
-//         await initializer.InitializeAsync(); // seeds roles + users
-//         logger.LogInformation("✅ Database migrated and seeded successfully.");
-//     }
-//     catch (Exception ex)
-//     {
-//         logger.LogError(ex, "❌ Error during database migration/seeding.");
-//         throw; // fail fast if seeding/migration is critical
-//     }
-// }
+        var initializer = services.GetRequiredService<DatabaseInitializer>();
+        await initializer.InitializeAsync(); // seeds roles + users
+        logger.LogInformation("✅ Database migrated and seeded successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "❌ Error during database migration/seeding.");
+        throw; // fail fast if seeding/migration is critical
+    }
+}
 
 
 app.Run();
