@@ -1,7 +1,7 @@
 # Minicommerce
 🛒 Minicommerce API
-
-
+E-commerce backend built with .NET 8, CQRS + MediatR, DDD structure, and EF Core for persistence.
+It supports basic workflows: browsing products, managing a cart, checking out, processing payments (mocked), and managing orders.
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
                        ************************************
