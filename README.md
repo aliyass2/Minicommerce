@@ -7,13 +7,13 @@
                        ************************************
 /////////////////////////////////////////////////////////////////////////////////////////////////
 Run the API
-
+When running the API, in Program.cs there is a script that triggers seeding, you may comment it out after your first Run
 From the project root:
 
 dotnet run --project .\src\Minicommerce.WebApi\Minicommerce.WebApi.csproj
 
-
-The API will start (default: https://localhost:5001 or http://localhost:5000).
+BUT-----
+Dont forget to migrate First 
 
 🗄 Database Setup
 
