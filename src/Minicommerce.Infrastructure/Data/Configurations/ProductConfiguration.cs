@@ -37,6 +37,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .WithMany()
             .HasForeignKey(p => p.CategoryId)
             .OnDelete(DeleteBehavior.Restrict);
+       builder.HasQueryFilter(p => p.IsActive && p.Category.DeletedAt == null);
 
         // Ignore domain events
         builder.Ignore(p => p.DomainEvents);

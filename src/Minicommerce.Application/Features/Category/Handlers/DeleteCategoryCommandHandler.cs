@@ -30,8 +30,10 @@ public class DeleteCategoryCommandHandler : IRequestHandler<DeleteCategoryComman
         {
             return Result.Failure($"Category with ID {request.Id} was not found");
         }
+        // Soft delete with current user ID - no business logic restrictions
+        categoryRepo.SoftDelete(entity, _currentUserService.UserId);
 
-        categoryRepo.HardDelete(entity);
+        // categoryRepo.HardDelete(entity);
         
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
