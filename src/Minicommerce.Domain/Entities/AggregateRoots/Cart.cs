@@ -66,12 +66,17 @@ public class Cart : AggregateRoot
         }
     }
 
-    public void Clear()
+    // public void Clear()
+    // {
+    //     _items.Clear();
+    //     AddDomainEvent(new CartClearedEvent(Id));
+    // }
+        public void Clear()
     {
-        _items.Clear();
-        AddDomainEvent(new CartClearedEvent(Id));
+        if (_items.Count == 0) return;        
+        _items.Clear();                           
+        AddDomainEvent(new CartClearedEvent(Id)); 
     }
 
-    // Helper
     public decimal TotalPrice => _items.Sum(i => i.TotalPrice);
 }

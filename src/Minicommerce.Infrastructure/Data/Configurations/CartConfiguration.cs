@@ -16,10 +16,12 @@ public class CartConfiguration : IEntityTypeConfiguration<CartAggregate>
             .IsRequired();
 
         // ✅ Map by navigation, not by field name
-        builder.HasMany(c => c.Items)
-            .WithOne()
-            .HasForeignKey("CartId")
-            .OnDelete(DeleteBehavior.Cascade);
+         builder.HasMany(c => c.Items)
+               .WithOne(i => i.Cart)                 // ← use navigation
+               .HasForeignKey(i => i.CartId)         // ← explicit FK
+               .IsRequired()                         // ← required relationship
+               .OnDelete(DeleteBehavior.Cascade);    // ← delete orphans
+
 
         // ✅ Tell EF to use the backing field "_items" for access
         builder.Navigation(c => c.Items)

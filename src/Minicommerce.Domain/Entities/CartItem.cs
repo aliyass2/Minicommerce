@@ -3,7 +3,11 @@ using Minicommerce.Domain.Common;
 namespace Minicommerce.Domain.Cart;
 
 public class CartItem : BaseEntity
+
 {
+    public Guid CartId { get; private set; }         // ← explicit FK
+    public Cart Cart { get; private set; } = default!; // ← back-reference
+
     public Guid ProductId { get; private set; }
     public string ProductName { get; private set; } = default!;
     public decimal UnitPrice { get; private set; }
