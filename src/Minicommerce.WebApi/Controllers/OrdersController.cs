@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Minicommerce.Application.Common.Models;
 using Minicommerce.Application.Features.Order.Queries;
+using Minicommerce.Application.Orders.Create;
 using Minicommerce.Application.Orders.Dtos;
 
 [ApiController]
@@ -56,7 +57,13 @@ public class OrdersController : ControllerBase
         return Ok(result.Data);
     }
 
-    [HttpPost("from-checkout/{checkoutId:guid}")]
-    public Task<OrderDto> CreateFromCheckout(Guid checkoutId) =>
-        _mediator.Send(new Minicommerce.Application.Orders.Create.CreateOrderFromCheckoutCommand(checkoutId));
-}
+[HttpPost("from-checkout/{checkoutId:guid}")]
+public async Task<ActionResult<OrderDto>> CreateFromCheckout(Guid checkoutId)
+{
+    var result = await _mediator.Send(new CreateOrderFromCheckoutCommand(checkoutId));
+
+    if (!result.Succeeded)
+        return BadRequest(new { errors = result.Errors });
+
+    return Ok(result.Data);
+}}
