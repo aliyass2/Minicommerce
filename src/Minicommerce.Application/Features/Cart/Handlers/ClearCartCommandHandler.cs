@@ -1,4 +1,4 @@
-// Minicommerce.Application.Cart.UpdateQuantity/UpdateCartItemQuantityCommandHandler.cs
+// Minicommerce.Application.Cart.Clear/ClearCartCommandHandler.cs
 using AutoMapper;
 using MediatR;
 using Minicommerce.Application.Common.Interfaces;
@@ -6,26 +6,23 @@ using Minicommerce.Application.Common.Models;
 using Minicommerce.Domain.Cart;
 using Minicommerce.Domain.Repositories;
 
-namespace Minicommerce.Application.Cart.UpdateQuantity;
+namespace Minicommerce.Application.Cart.Clear;
 
-public sealed class UpdateCartItemQuantityCommandHandler
-    : IRequestHandler<UpdateCartItemQuantityCommand, Result<CartDto>>
+public sealed class ClearCartCommandHandler
+    : IRequestHandler<ClearCartCommand, Result<CartDto>>
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
     private readonly ICurrentUserService _currentUser;
 
-    public UpdateCartItemQuantityCommandHandler(
-        IUnitOfWork uow,
-        IMapper mapper,
-        ICurrentUserService currentUser)
+    public ClearCartCommandHandler(IUnitOfWork uow, IMapper mapper, ICurrentUserService currentUser)
     {
         _uow = uow;
         _mapper = mapper;
         _currentUser = currentUser;
     }
 
-    public async Task<Result<CartDto>> Handle(UpdateCartItemQuantityCommand request, CancellationToken ct)
+    public async Task<Result<CartDto>> Handle(ClearCartCommand request, CancellationToken ct)
     {
         try
         {
@@ -38,14 +35,7 @@ public sealed class UpdateCartItemQuantityCommandHandler
             if (cart is null)
                 throw new CartException("Cart not found.");
 
-            if (request.Quantity == 0)
-            {
-                cart.RemoveItem(request.ProductId);
-            }
-            else
-            {
-                cart.UpdateQuantity(request.ProductId, request.Quantity);
-            }
+            cart.Clear();
 
             await _uow.SaveChangesAsync(ct);
 
@@ -58,7 +48,7 @@ public sealed class UpdateCartItemQuantityCommandHandler
         }
         catch (Exception ex)
         {
-            return Result<CartDto>.Failure($"Failed to update cart item: {ex.Message}");
+            return Result<CartDto>.Failure($"Failed to clear cart: {ex.Message}");
         }
     }
 }

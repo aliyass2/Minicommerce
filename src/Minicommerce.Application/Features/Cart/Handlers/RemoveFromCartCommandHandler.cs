@@ -2,12 +2,14 @@
 using AutoMapper;
 using MediatR;
 using Minicommerce.Application.Common.Interfaces;
+using Minicommerce.Application.Common.Models;
 using Minicommerce.Domain.Cart;
 using Minicommerce.Domain.Repositories;
 
 namespace Minicommerce.Application.Cart.RemoveItem;
 
-public sealed class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCartCommand, CartDto>
+public sealed class RemoveFromCartCommandHandler
+    : IRequestHandler<RemoveFromCartCommand, Result<CartDto>>
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
@@ -20,23 +22,33 @@ public sealed class RemoveFromCartCommandHandler : IRequestHandler<RemoveFromCar
         _currentUser = currentUser;
     }
 
-    public async Task<CartDto> Handle(RemoveFromCartCommand request, CancellationToken ct)
+    public async Task<Result<CartDto>> Handle(RemoveFromCartCommand request, CancellationToken ct)
     {
-        var userId = _currentUser.UserId;
-        if (string.IsNullOrWhiteSpace(userId))
-            throw new CartException("User must be authenticated to modify a cart.");
+        try
+        {
+            var userId = _currentUser.UserId;
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new CartException("User must be authenticated to modify a cart.");
 
-        var cartRepo = _uow.Repository<Minicommerce.Domain.Cart.Cart>();
+            var cartRepo = _uow.Repository<Minicommerce.Domain.Cart.Cart>();
+            var cart = await cartRepo.FirstOrDefaultAsync(c => c.UserId == userId, ct);
+            if (cart is null)
+                throw new CartException("Cart not found.");
 
-        var cart = await cartRepo.FirstOrDefaultAsync(c => c.UserId == userId, ct);
-        if (cart is null)
-            throw new CartException("Cart not found.");
+            cart.RemoveItem(request.ProductId);
 
-        // DDD method throws if item not found (as we designed)
-        cart.RemoveItem(request.ProductId);
+            await _uow.SaveChangesAsync(ct);
 
-        await _uow.SaveChangesAsync(ct);
-
-        return _mapper.Map<CartDto>(cart);
+            var dto = _mapper.Map<CartDto>(cart);
+            return Result<CartDto>.Success(dto);
+        }
+        catch (CartException ex)
+        {
+            return Result<CartDto>.Failure(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<CartDto>.Failure($"Failed to remove item from cart: {ex.Message}");
+        }
     }
 }

@@ -58,18 +58,46 @@ public class CartController : ControllerBase
         return Ok(result.Data);
     }
     [HttpPost("items")]
-    public async Task<ActionResult<CartDto>> Add(AddToCartCommand cmd) => Ok(await _mediator.Send(cmd));
+    public async Task<ActionResult<CartDto>> Add([FromBody] AddToCartCommand cmd)
+    {
+        var result = await _mediator.Send(cmd);
+
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
+
+        return Ok(result.Data);
+    }
 
     [HttpPut("items/{productId:guid}")]
     public async Task<ActionResult<CartDto>> Update(Guid productId, [FromBody] int quantity)
-        => Ok(await _mediator.Send(new UpdateCartItemQuantityCommand(productId, quantity)));
+    {
+        var result = await _mediator.Send(new UpdateCartItemQuantityCommand(productId, quantity));
+
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
+
+        return Ok(result.Data);
+    }
 
     [HttpDelete("items/{productId:guid}")]
     public async Task<ActionResult<CartDto>> Remove(Guid productId)
-        => Ok(await _mediator.Send(new RemoveFromCartCommand(productId)));
+    {
+        var result = await _mediator.Send(new RemoveFromCartCommand(productId));
 
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
+
+        return Ok(result.Data);
+    }
     [HttpDelete]
     public async Task<ActionResult<CartDto>> Clear()
-        => Ok(await _mediator.Send(new ClearCartCommand()));
+    {
+        var result = await _mediator.Send(new ClearCartCommand());
+
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
+
+        return Ok(result.Data);
+    }
 
 }
