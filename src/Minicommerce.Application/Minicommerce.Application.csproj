@@ -19,7 +19,6 @@
     <Folder Include="Features\Auth\Queries\" />
     <Folder Include="Features\Category\Validators\" />
     <Folder Include="Features\CheckOut\Queries\" />
-    <Folder Include="Features\Order\Queries\" />
   </ItemGroup>
 
   <PropertyGroup>

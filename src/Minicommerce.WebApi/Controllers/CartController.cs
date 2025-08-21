@@ -1,4 +1,6 @@
+using System.Security.Claims;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Minicommerce.Application.Cart.AddItem;
 using Minicommerce.Application.Cart.Clear;
@@ -15,6 +17,8 @@ public class CartController : ControllerBase
     public CartController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
+
     public async Task<ActionResult<PaginatedList<CartDto>>> List(
          [FromQuery] string? userid,
          [FromQuery] int page = 1,
@@ -38,20 +42,21 @@ public class CartController : ControllerBase
     [HttpGet("my")]
     public async Task<ActionResult<CartDto>> GetMyCart()
     {
-        // assuming User.Identity.Name or a claim contains userId
-        var userId = User.FindFirst("sub")?.Value ?? User.Identity?.Name;
+        var userId =
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ??
+            User.FindFirst("sub")?.Value ??
+            User.FindFirstValue("userId"); // optional custom claim fallback
 
         if (string.IsNullOrWhiteSpace(userId))
-            return Unauthorized();
+            return Unauthorized(new { errors = new[] { "Missing user id claim." } });
 
         var result = await _mediator.Send(new GetMyCartQuery(userId));
 
-        if (!result.Succeeded)
+        if (!result.Succeeded || result.Data is null)
             return NotFound(new { errors = result.Errors });
 
         return Ok(result.Data);
     }
-
     [HttpPost("items")]
     public async Task<ActionResult<CartDto>> Add(AddToCartCommand cmd) => Ok(await _mediator.Send(cmd));
 

@@ -152,7 +152,7 @@ public class UsersController : ControllerBase
         }
     }
         [HttpDelete("{id}")]
-        [Authorize(Roles = "SuperAdmin,Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ForceDeleteUser(string id)
         {
             // prevent deleting the currently logged-in user
