@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Minicommerce.Application.Catalog.Categories.Create;
 using Minicommerce.Application.Common.Models;
@@ -45,6 +46,8 @@ public class CategoryController : ControllerBase
         return Ok(result.Data);
     }
     [HttpPost]
+    [Authorize(Roles = "Admin")]
+
     public async Task<ActionResult<CategoryDto>> Create([FromBody] AddCategoryCommand command)
     {
         var result = await _mediator.Send(command);
@@ -60,6 +63,8 @@ public class CategoryController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
     [HttpPatch("{id}")]
+    [Authorize(Roles = "Admin")]
+
     public async Task<IActionResult> PatchCategory(Guid id, [FromBody] PatchCategoryDto categoryDto)
     {
         var command = new PatchCategoryCommand(id, categoryDto);
@@ -83,6 +88,8 @@ public class CategoryController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+
     public async Task<IActionResult> DeleteCategory(Guid id)
     {
         var result = await _mediator.Send(new DeleteCategoryCommand(id));

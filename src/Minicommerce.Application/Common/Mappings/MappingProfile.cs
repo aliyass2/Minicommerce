@@ -23,7 +23,15 @@ public class MappingProfile : Profile
         // User Mappings
         CreateMap<ApplicationUser, UserDto>();
         CreateMap<CreateUserDto, ApplicationUser>();
-        CreateMap<UpdateUserDto, ApplicationUser>();
+        CreateMap<UpdateUserDto, ApplicationUser>()
+            .ForMember(dest => dest.UserName, opt =>
+                opt.Condition(src => !string.IsNullOrWhiteSpace(src.UserName)))
+            .ForMember(dest => dest.FullName, opt =>
+                opt.Condition(src => !string.IsNullOrWhiteSpace(src.FullName)))
+            .ForMember(dest => dest.Position, opt =>
+                opt.Condition(src => src.Position != null))
+            .ForMember(dest => dest.IsActive, opt =>
+                opt.Condition(src => src.IsActive != default(bool))); 
         CreateMap<ApplicationUser, UserListDto>()
             .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => src.FullName))
             .ForMember(dest => dest.Roles, opt => opt.Ignore());

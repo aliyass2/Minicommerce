@@ -57,13 +57,16 @@ public class OrdersController : ControllerBase
         return Ok(result.Data);
     }
 
-[HttpPost("from-checkout/{checkoutId:guid}")]
-public async Task<ActionResult<OrderDto>> CreateFromCheckout(Guid checkoutId)
-{
-    var result = await _mediator.Send(new CreateOrderFromCheckoutCommand(checkoutId));
+    [HttpPost("from-checkout/{checkoutId:guid}")]
 
-    if (!result.Succeeded)
-        return BadRequest(new { errors = result.Errors });
+    public async Task<ActionResult<OrderDto>> CreateFromCheckout(Guid checkoutId)
+    {
+        var result = await _mediator.Send(new CreateOrderFromCheckoutCommand(checkoutId));
 
-    return Ok(result.Data);
-}}
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
+
+        return Ok(result.Data);
+
+    }
+}

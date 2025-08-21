@@ -1,6 +1,7 @@
 // Minicommerce.Application.Cart.UpdateQuantity/UpdateCartItemQuantityCommandHandler.cs
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Minicommerce.Application.Common.Interfaces;
 using Minicommerce.Application.Common.Models;
 using Minicommerce.Domain.Cart;
@@ -34,7 +35,13 @@ public sealed class UpdateCartItemQuantityCommandHandler
                 throw new CartException("User must be authenticated to modify a cart.");
 
             var cartRepo = _uow.Repository<Minicommerce.Domain.Cart.Cart>();
-            var cart = await cartRepo.FirstOrDefaultAsync(c => c.UserId == userId, ct);
+
+            // ↓↓↓ IMPORTANT: load items so EF tracks them and domain methods can find the line
+            var cart = await cartRepo
+                .GetQueryable()
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(c => c.UserId == userId, ct);
+
             if (cart is null)
                 throw new CartException("Cart not found.");
 
@@ -62,3 +69,4 @@ public sealed class UpdateCartItemQuantityCommandHandler
         }
     }
 }
+

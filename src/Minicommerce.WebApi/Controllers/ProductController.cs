@@ -20,6 +20,8 @@ public class ProductController : ControllerBase
     public ProductController(IMediator mediator) => _mediator = mediator;
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
+
     public async Task<ActionResult<ProductDto>> Create([FromBody] AddProductCommand command)
     {
         var result = await _mediator.Send(command);
@@ -34,6 +36,8 @@ public class ProductController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = result.Data!.Id }, result.Data);
     }
     [HttpPatch("{id}")]
+    [Authorize(Roles = "Admin")]
+
     public async Task<IActionResult> PatchProduct(Guid id, [FromBody] PatchProductDto productDto)
     {
         var command = new PatchProductCommand(id, productDto);
@@ -57,6 +61,8 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [Authorize]
+
     public async Task<ActionResult<ProductDto>> GetById(Guid id)
     {
         var result = await _mediator.Send(new GetProductByIdQuery(id));
@@ -68,6 +74,8 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
+
     public async Task<ActionResult<PaginatedList<ProductDto>>> List(
         [FromQuery] string? search,
         [FromQuery] Guid? categoryId,
@@ -91,6 +99,8 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         var result = await _mediator.Send(new DeleteProductCommand(id));

@@ -23,7 +23,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "Admin,Supervisor")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<UserListDto>>> GetAllUsers(
         [FromQuery] bool? isActive = null,
         [FromQuery] string? role = null
@@ -51,7 +51,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Roles = "Admin,Supervisor")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> GetUserById(string id)
     {
         try
@@ -74,7 +74,7 @@ public class UsersController : ControllerBase
         }
     }
     [HttpGet("roles")]
-    [Authorize(Roles = "Admin,Supervisor")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult<IEnumerable<RoleDto>>> GetAllRoles()
     {
         try
@@ -92,27 +92,6 @@ public class UsersController : ControllerBase
             return StatusCode(500, new { message = "An error occurred while retrieving roles", error = ex.Message });
         }
     }
-
-    [HttpGet("by-role/{role}")]
-    [Authorize(Roles = "Admin,Supervisor")]
-    public async Task<ActionResult<IEnumerable<UserListDto>>> GetUsersByRole(string role)
-    {
-        try
-        {
-            var query = new GetUsersByRoleQuery { Role = role };
-            var users = await _mediator.Send(query);
-            return Ok(users);
-        }
-        catch (ValidationException ex)
-        {
-            return BadRequest(new { message = "Validation failed", errors = ex.Errors });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, new { message = "An error occurred while retrieving users", error = ex.Message });
-        }
-    }
-
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<UserDto>> CreateUser([FromBody] CreateUserDto createUserDto)

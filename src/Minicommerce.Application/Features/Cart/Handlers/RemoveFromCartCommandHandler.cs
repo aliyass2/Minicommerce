@@ -1,6 +1,6 @@
-// Minicommerce.Application.Cart.RemoveItem/RemoveFromCartCommandHandler.cs
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Minicommerce.Application.Common.Interfaces;
 using Minicommerce.Application.Common.Models;
 using Minicommerce.Domain.Cart;
@@ -31,9 +31,17 @@ public sealed class RemoveFromCartCommandHandler
                 throw new CartException("User must be authenticated to modify a cart.");
 
             var cartRepo = _uow.Repository<Minicommerce.Domain.Cart.Cart>();
-            var cart = await cartRepo.FirstOrDefaultAsync(c => c.UserId == userId, ct);
+
+            var cart = await cartRepo
+                .GetQueryable()
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(c => c.UserId == userId, ct);
+
             if (cart is null)
                 throw new CartException("Cart not found.");
+
+            if (!cart.Items.Any(i => i.ProductId == request.ProductId))
+                throw new CartException("Item not found in cart.");
 
             cart.RemoveItem(request.ProductId);
 
