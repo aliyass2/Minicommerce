@@ -2,13 +2,14 @@ using AutoMapper;
 using MediatR;
 using Minicommerce.Application.Checkout.Dtos;
 using Minicommerce.Application.Common.Interfaces;
+using Minicommerce.Application.Common.Models;
 using Minicommerce.Domain.Checkout;
 using Minicommerce.Domain.Repositories;
 
 namespace Minicommerce.Application.Checkout.Pay;
 
 public sealed class PayCheckoutCommandHandler
-    : IRequestHandler<PayCheckoutCommand, CheckoutDto>
+    : IRequestHandler<PayCheckoutCommand, Result<CheckoutDto>>
 {
     private readonly IUnitOfWork _uow;
     private readonly IMapper _mapper;
@@ -21,25 +22,39 @@ public sealed class PayCheckoutCommandHandler
         _currentUser = currentUser;
     }
 
-    public async Task<CheckoutDto> Handle(PayCheckoutCommand request, CancellationToken ct)
+    public async Task<Result<CheckoutDto>> Handle(PayCheckoutCommand request, CancellationToken ct)
     {
-        var userId = _currentUser.UserId;
-        if (string.IsNullOrWhiteSpace(userId))
-            throw new CheckoutException("User must be authenticated to pay checkout.");
+        try
+        {
+            var userId = _currentUser.UserId;
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new CheckoutException("User must be authenticated to pay checkout.");
 
-        var checkoutRepo = _uow.Repository<Domain.Checkout.Checkout>();
-        var checkout = await checkoutRepo.FirstOrDefaultAsync(c => c.Id == request.CheckoutId && c.UserId == userId, ct);
-        if (checkout is null)
-            throw new CheckoutException("Checkout not found.");
+            var checkoutRepo = _uow.Repository<Domain.Checkout.Checkout>();
+            var checkout = await checkoutRepo.FirstOrDefaultAsync(
+                c => c.Id == request.CheckoutId && c.UserId == userId, ct);
 
-        var txnId = string.IsNullOrWhiteSpace(request.TransactionId)
-            ? Guid.NewGuid().ToString()
-            : request.TransactionId;
+            if (checkout is null)
+                throw new CheckoutException("Checkout not found.");
 
-        checkout.MakePayment(new PaymentInfo(request.PaymentMethod, txnId, isMocked: true));
+            var txnId = string.IsNullOrWhiteSpace(request.TransactionId)
+                ? Guid.NewGuid().ToString()
+                : request.TransactionId;
 
-        await _uow.SaveChangesAsync(ct);
+            checkout.MakePayment(new PaymentInfo(request.PaymentMethod, txnId, isMocked: true));
 
-        return _mapper.Map<CheckoutDto>(checkout);
+            await _uow.SaveChangesAsync(ct);
+
+            var dto = _mapper.Map<CheckoutDto>(checkout);
+            return Result<CheckoutDto>.Success(dto);
+        }
+        catch (CheckoutException ex)
+        {
+            return Result<CheckoutDto>.Failure(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Result<CheckoutDto>.Failure($"Failed to pay checkout: {ex.Message}");
+        }
     }
 }

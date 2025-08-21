@@ -11,16 +11,38 @@ public class CheckoutController : ControllerBase
     public CheckoutController(IMediator mediator) => _mediator = mediator;
 
     [HttpPost]
-    public Task<CheckoutDto> Create() =>
-        _mediator.Send(new CreateCheckoutFromCartCommand());
+    public async Task<ActionResult<CheckoutDto>> Create()
+    {
+        var result = await _mediator.Send(new CreateCheckoutFromCartCommand());
 
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
+
+        return Ok(result.Data);
+    }
     [HttpPost("{checkoutId:guid}/pay")]
-    public Task<CheckoutDto> Pay(Guid checkoutId, [FromBody] PayCheckoutBody body) =>
-        _mediator.Send(new Minicommerce.Application.Checkout.Pay.PayCheckoutCommand(checkoutId, body.PaymentMethod, body.TransactionId));
+    public async Task<ActionResult<CheckoutDto>> Pay(Guid checkoutId)
+    {
+        const string defaultPaymentMethod = "CashOnDelivery";
+        var result = await _mediator.Send(
+            new Minicommerce.Application.Checkout.Pay.PayCheckoutCommand(
+                checkoutId, defaultPaymentMethod));
 
-    [HttpPost("{checkoutId:guid}/complete")]
-    public Task<CheckoutDto> Complete(Guid checkoutId) =>
-        _mediator.Send(new Minicommerce.Application.Checkout.Complete.CompleteCheckoutCommand(checkoutId));
-}
+        if (!result.Succeeded)
+            return BadRequest(new { errors = result.Errors });
 
-public sealed record PayCheckoutBody(string PaymentMethod, string? TransactionId);
+        return Ok(result.Data);
+    }
+
+[HttpPost("{checkoutId:guid}/complete")]
+public async Task<ActionResult<CheckoutDto>> Complete(Guid checkoutId)
+{
+    var result = await _mediator.Send(
+        new Minicommerce.Application.Checkout.Complete.CompleteCheckoutCommand(checkoutId));
+
+    if (!result.Succeeded)
+        return BadRequest(new { errors = result.Errors });
+
+    return Ok(result.Data);
+}}
+
