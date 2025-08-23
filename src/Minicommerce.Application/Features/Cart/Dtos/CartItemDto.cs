@@ -1,4 +1,3 @@
-using System;
 
 namespace Minicommerce.Application.Features.Cart.Dtos;
 

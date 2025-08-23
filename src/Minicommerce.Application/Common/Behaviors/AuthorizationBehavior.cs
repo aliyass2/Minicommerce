@@ -1,4 +1,3 @@
-// Solution 1: Updated AuthorizationBehavior - Only apply to MediatR commands
 using MediatR;
 using Minicommerce.Application.Common.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -15,7 +14,7 @@ public class AuthorizationBehavior<TRequest, TResponse>
     private static readonly HashSet<string> AnonymousCommands = new()
     {
         "LoginCommand",
-        "ForgotPasswordCommand", // If you add password reset
+        "ForgotPasswordCommand",
         "ResetPasswordCommand"
     };
 

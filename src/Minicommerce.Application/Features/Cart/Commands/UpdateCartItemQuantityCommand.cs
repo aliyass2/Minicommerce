@@ -1,4 +1,3 @@
-// Minicommerce.Application.Cart.UpdateQuantity/UpdateCartItemQuantityCommand.cs
 using MediatR;
 using Minicommerce.Application.Common.Models;
 

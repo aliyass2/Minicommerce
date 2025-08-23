@@ -1,4 +1,3 @@
-// Minicommerce.Application.Cart.RemoveItem/RemoveFromCartCommand.cs
 using MediatR;
 using Minicommerce.Application.Common.Models;
 

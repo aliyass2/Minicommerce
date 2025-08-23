@@ -1,4 +1,3 @@
-// Minicommerce.Application.Cart.Clear/ClearCartCommand.cs
 using MediatR;
 using Minicommerce.Application.Common.Models;
 

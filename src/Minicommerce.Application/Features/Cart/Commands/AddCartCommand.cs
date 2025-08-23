@@ -1,4 +1,3 @@
-// Minicommerce.Application.Cart.AddItem/AddToCartCommand.cs
 using MediatR;
 using Minicommerce.Application.Common.Models;
 
