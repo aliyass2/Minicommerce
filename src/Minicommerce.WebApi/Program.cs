@@ -44,7 +44,8 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
-});builder.Services.AddControllers();
+});
+builder.Services.AddControllers();
 // Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -103,7 +104,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddScoped<RoleSeeder>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DatabaseInitializer>();
-builder.Services.AddScoped<CatalogSeeder>();   // ← add this
+builder.Services.AddScoped<CatalogSeeder>();
 
 
 builder.Services.AddCors(options =>
